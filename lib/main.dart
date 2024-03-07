@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -16,6 +19,9 @@ class _MyAppState extends State<MyApp> {
   static const pressureChannel = EventChannel("com.julow.barometer/pressure");
 
   String _sensorAvailable = 'unknown';
+  double _pressureReading = 0;
+
+  StreamSubscription? pressureSubsciption;
 
   Future<void> _checkAvailablity() async {
     print("btn pressed");
@@ -28,6 +34,24 @@ class _MyAppState extends State<MyApp> {
     } catch (e) {
       print(e);
     }
+  }
+
+  _startReading() {
+    pressureSubsciption =
+        pressureChannel.receiveBroadcastStream().listen((event) {
+      setState(() {
+        _pressureReading = event;
+      });
+    });
+  }
+
+  _stopReading() {
+    setState(() {
+      _pressureReading = 0;
+    });
+    try {
+      pressureSubsciption!.cancel();
+    } catch (e) {}
   }
 
   @override
@@ -46,7 +70,19 @@ class _MyAppState extends State<MyApp> {
               ElevatedButton(
                 onPressed: () => _checkAvailablity(),
                 child: Text('Chcek Sensor available'),
-              )
+              ),
+              SizedBox(
+                height: 16,
+              ),
+              Text('sensor Reading : $_pressureReading'),
+              ElevatedButton(
+                onPressed: _startReading,
+                child: Text('start REading'),
+              ),
+              ElevatedButton(
+                onPressed: _stopReading,
+                child: Text('stop REading'),
+              ),
             ],
           ),
         ),

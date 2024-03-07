@@ -7,6 +7,8 @@ import androidx.annotation.NonNull
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.BinaryMessenger
+import io.flutter.plugin.common.EventChannel
+import io.flutter.plugin.common.EventChannel.StreamHandler
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity: FlutterActivity(){
@@ -19,6 +21,9 @@ class MainActivity: FlutterActivity(){
 
    //bring a sensor manager
     private lateinit var sensorManager : SensorManager
+    private  var pressureChannel : EventChannel? =null
+    private var pressurestreamHandler : CustomStreamHandler? =null
+
 
     //excute this code in start up of the app
 
@@ -40,6 +45,11 @@ class MainActivity: FlutterActivity(){
             result.notImplemented()
         }
         }
+        //load app pressure channel
+        pressureChannel = EventChannel(messenger,PRESSURE_CAHNNEL_NAME)
+        pressurestreamHandler = CustomStreamHandler(sensorManager!!, Sensor.TYPE_PRESSURE)
+        pressureChannel!!.setStreamHandler(pressurestreamHandler)
+
 
 
     }
@@ -52,6 +62,7 @@ class MainActivity: FlutterActivity(){
 
     private fun tearDownChannels(){
         methodChannel!!.setMethodCallHandler(null)
+        pressureChannel!!.setStreamHandler(null)
     }
 
 
